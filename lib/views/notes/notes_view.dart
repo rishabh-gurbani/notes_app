@@ -4,14 +4,14 @@ import 'package:notes_app/enums/menu_action.dart';
 import 'package:notes_app/services/auth/auth_service.dart';
 import 'package:notes_app/services/crud/notes_service.dart';
 
-class Notes extends StatefulWidget {
-  const Notes({Key? key}) : super(key: key);
+class NotesView extends StatefulWidget {
+  const NotesView({Key? key}) : super(key: key);
 
   @override
-  State<Notes> createState() => _NotesState();
+  State<NotesView> createState() => _NotesViewState();
 }
 
-class _NotesState extends State<Notes> {
+class _NotesViewState extends State<NotesView> {
   late final NotesService _notesService;
 
   String get userEmail => AuthService.firebase().getCurrentUser!.email!;
@@ -34,6 +34,11 @@ class _NotesState extends State<Notes> {
       appBar: AppBar(
         title: const Text("Notes"),
         actions: [
+          IconButton(
+              onPressed: () {
+                Navigator.of(context).pushNamed(newNoteRoute);
+              },
+              icon: Icon(Icons.add)),
           PopupMenuButton<MenuAction>(onSelected: (value) async {
             switch (value) {
               case MenuAction.logout:
@@ -59,8 +64,8 @@ class _NotesState extends State<Notes> {
               case ConnectionState.done:
                 return StreamBuilder(
                   stream: _notesService.allNotes,
-                  builder: (context,snapshot){
-                    switch(snapshot.connectionState){
+                  builder: (context, snapshot) {
+                    switch (snapshot.connectionState) {
                       case ConnectionState.waiting:
                         return Text("Waiting");
                       default:
