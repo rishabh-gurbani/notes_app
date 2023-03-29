@@ -67,12 +67,16 @@ class _LoginViewState extends State<LoginView> {
               onPressed: () async {
                 final mail = email.text;
                 final pass = password.text;
+
+                // show loading screen when login button pressed
                 showDialog(context: context,
                     builder: (context) {
                       return const Center(
                         child: CircularProgressIndicator(),
                       );
                     });
+
+
                 try {
                   final user = await authService.logIn(
                       email: mail, password: pass

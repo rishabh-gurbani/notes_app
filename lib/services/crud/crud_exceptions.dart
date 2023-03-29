@@ -21,3 +21,5 @@ class DatabaseNotOpenException implements Exception{
 
 class UnableToGetDocumentsDirectory implements Exception{
 }
+
+class DatabaseAlreadyOpenException implements Exception {}
