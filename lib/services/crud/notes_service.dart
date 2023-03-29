@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:sqflite/sqflite.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart';
@@ -50,7 +52,7 @@ class NotesService {
       // catch the error and let it go
     }
   }
-  
+
   // opening the database
   // if database does not exist, create db and tables
   Future<void> open() async {
@@ -129,7 +131,7 @@ class NotesService {
   }
 
   Future<DatabaseNote> createNote(
-      {required DatabaseUser owner, required text}) async {
+      {required DatabaseUser owner}) async {
     await _ensureDbIsOpen();
     final db = _getDatabaseOrThrow();
 
@@ -138,11 +140,12 @@ class NotesService {
       throw CouldNotFindUserException();
     }
 
+    const text = '';
+
     final noteId = await db.insert(noteTable,
-        {userIdColumn: owner.id, textColumn: text, isSyncedColumn: true});
+        {userIdColumn: owner.id, textColumn: text, isSyncedColumn: 1});
 
     final note = DatabaseNote(noteId, owner.id, text, true);
-
     _dbNotes.add(note);
     _notesStreamController.add(_dbNotes);
 
@@ -156,7 +159,7 @@ class NotesService {
     final res = await db.delete(noteTable, where: "id = ?", whereArgs: [id]);
 
     if (res == 0) throw CouldNotDeleteNoteException();
-    
+
     _dbNotes.removeWhere((element) => element.id == id);
     _notesStreamController.add(_dbNotes);
 
