@@ -1,4 +1,4 @@
-import 'package:notes_app/extension/filter.dart';
+import 'package:notes_app/extensions/list/filter.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart';
