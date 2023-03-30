@@ -4,32 +4,31 @@ import 'package:path/path.dart';
 import 'crud_exceptions.dart';
 import 'dart:async';
 
-
 class NotesService {
   Database? _db;
 
   List<DatabaseNote> _dbNotes = [];
 
   static final NotesService _shared = NotesService._sharedInstance();
-  NotesService._sharedInstance(){
-    _notesStreamController = StreamController<List<DatabaseNote>>.broadcast(
-      onListen: (){
-        _notesStreamController.sink.add(_dbNotes);
-      }
-    );
+
+  NotesService._sharedInstance() {
+    _notesStreamController =
+        StreamController<List<DatabaseNote>>.broadcast(onListen: () {
+      _notesStreamController.sink.add(_dbNotes);
+    });
   }
+
   factory NotesService() => _shared;
 
-  late final StreamController<List<DatabaseNote>> _notesStreamController ;
-
+  late final StreamController<List<DatabaseNote>> _notesStreamController;
 
   Stream<List<DatabaseNote>> get allNotes => _notesStreamController.stream;
 
-  Future<DatabaseUser> getOrCreateUser({required String email}){
-    try{
+  Future<DatabaseUser> getOrCreateUser({required String email}) {
+    try {
       final user = getUser(email: email);
       return user;
-    } on CouldNotFindUserException{
+    } on CouldNotFindUserException {
       final user = createUser(email: email);
       return user;
     }
@@ -47,10 +46,10 @@ class NotesService {
     _notesStreamController.add(_dbNotes);
   }
 
-  Future<void> _ensureDbIsOpen() async{
-    try{
+  Future<void> _ensureDbIsOpen() async {
+    try {
       await open();
-    } on DatabaseAlreadyOpenException{
+    } on DatabaseAlreadyOpenException {
       // empty
       // ensuring that it doesn't open again and again, when hot reloaded
       // catch the error and let it go
@@ -134,8 +133,7 @@ class NotesService {
     return DatabaseUser.fromRow(res[0]);
   }
 
-  Future<DatabaseNote> createNote(
-      {required DatabaseUser owner}) async {
+  Future<DatabaseNote> createNote({required DatabaseUser owner}) async {
     await _ensureDbIsOpen();
     final db = _getDatabaseOrThrow();
 
@@ -154,12 +152,11 @@ class NotesService {
       _notesStreamController.add(_dbNotes);
 
       return note;
-    } catch(e){
+    } catch (e) {
       rethrow;
     }
 
     // print(noteId);
-
   }
 
   Future<void> deleteNote({required int id}) async {
@@ -172,7 +169,6 @@ class NotesService {
 
     _dbNotes.removeWhere((element) => element.id == id);
     _notesStreamController.add(_dbNotes);
-
   }
 
   Future<int> deleteAllNotes() async {
@@ -206,7 +202,7 @@ class NotesService {
     if (notes.isEmpty) {
       throw CouldNotFindNoteException();
     } else {
-      final note =  DatabaseNote.fromRow(notes.first);
+      final note = DatabaseNote.fromRow(notes.first);
       _dbNotes.removeWhere((element) => element.id == id);
       _dbNotes.add(note);
       _notesStreamController.add(_dbNotes);
@@ -218,7 +214,6 @@ class NotesService {
       {required DatabaseNote note, required String text}) async {
     await _ensureDbIsOpen();
     final db = _getDatabaseOrThrow();
-    await getNote(id: note.id);
 
     final count = await db.update(noteTable, {textColumn: text},
         where: "id = ?", whereArgs: [note.id]);
