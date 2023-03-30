@@ -8,10 +8,10 @@ class FirebaseCloudStorage {
   // return collections reference
   final notes = FirebaseFirestore.instance.collection('notes');
 
-  Future<void> updateNotes(
-    String documentId,
-    String text,
-  ) async {
+  Future<void> updateNote({
+    required String documentId,
+    required String text,
+  }) async {
     try {
       await notes.doc(documentId).update({textFieldName: text});
     } catch (e) {
@@ -19,7 +19,7 @@ class FirebaseCloudStorage {
     }
   }
 
-  Future<void> deleteNote(String documentId) async {
+  Future<void> deleteNote({required String documentId}) async {
     try {
       await notes.doc(documentId).delete();
     } catch (e) {
@@ -28,15 +28,17 @@ class FirebaseCloudStorage {
   }
 
   // returns document reference
-  void createNewNote({required String ownerUserId}) async {
-    await notes.add({
-      ownerUserIdFieldName: ownerUserId,
-      textFieldName: "",
-    });
+  Future<CloudNote> createNewNote({required String ownerUserId}) async {
+    return await notes
+        .add({
+          ownerUserIdFieldName: ownerUserId,
+          textFieldName: "",
+        })
+        .then((doc) => doc.get())
+        .then((docSnapshot) => CloudNote.fromDocumentSnapshot(docSnapshot));
   }
 
   Stream<Iterable<CloudNote>> allNotes({required String ownerUserId}) {
-
     // two ways of doing same things
     // either get all docs and check the ones with userID
     // or query those docs which have user ID
@@ -45,12 +47,12 @@ class FirebaseCloudStorage {
     //     .map((doc) => CloudNote.fromSnapshot(doc))
     //     .where((note) => note.ownerUserId == ownerUserId));
 
-    return notes.where(ownerUserIdFieldName, isEqualTo: ownerUserId).
-    snapshots().map((querySnapshot) => querySnapshot.docs
-        .map((doc) => CloudNote.fromSnapshot(doc)));
-
+    return notes
+        .where(ownerUserIdFieldName, isEqualTo: ownerUserId)
+        .snapshots()
+        .map((querySnapshot) =>
+            querySnapshot.docs.map((doc) => CloudNote.fromQuerySnapshot(doc)));
   }
-
 
   /// returns iterable of all notes for given user
   /// query itself makes sure that all notes retrieved belong to respective user
@@ -61,7 +63,8 @@ class FirebaseCloudStorage {
           .where(ownerUserIdFieldName, isEqualTo: ownerUserId)
           .get()
           .then((querySnapshot) => querySnapshot.docs.map(
-              (queryDocumentSnapshot) => CloudNote.fromSnapshot(queryDocumentSnapshot)));
+              (queryDocumentSnapshot) =>
+                  CloudNote.fromQuerySnapshot(queryDocumentSnapshot)));
     } catch (e) {
       throw CouldNotGetAllNotesException();
     }
