@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:sqflite/sqflite.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart';
@@ -13,11 +11,17 @@ class NotesService {
   List<DatabaseNote> _dbNotes = [];
 
   static final NotesService _shared = NotesService._sharedInstance();
-  NotesService._sharedInstance();
+  NotesService._sharedInstance(){
+    _notesStreamController = StreamController<List<DatabaseNote>>.broadcast(
+      onListen: (){
+        _notesStreamController.sink.add(_dbNotes);
+      }
+    );
+  }
   factory NotesService() => _shared;
 
-  final _notesStreamController =
-      StreamController<List<DatabaseNote>>.broadcast();
+  late final StreamController<List<DatabaseNote>> _notesStreamController ;
+
 
   Stream<List<DatabaseNote>> get allNotes => _notesStreamController.stream;
 
@@ -142,14 +146,20 @@ class NotesService {
 
     const text = '';
 
-    final noteId = await db.insert(noteTable,
-        {userIdColumn: owner.id, textColumn: text, isSyncedColumn: 1});
+    try {
+      final noteId = await db.insert(noteTable,
+          {userIdColumn: owner.id, textColumn: text, isSyncedColumn: 1});
+      final note = DatabaseNote(noteId, owner.id, text, true);
+      _dbNotes.add(note);
+      _notesStreamController.add(_dbNotes);
 
-    final note = DatabaseNote(noteId, owner.id, text, true);
-    _dbNotes.add(note);
-    _notesStreamController.add(_dbNotes);
+      return note;
+    } catch(e){
+      rethrow;
+    }
 
-    return note;
+    // print(noteId);
+
   }
 
   Future<void> deleteNote({required int id}) async {
@@ -282,7 +292,7 @@ const emailColumn = "email";
 
 const userIdColumn = "user_id";
 const textColumn = "text";
-const isSyncedColumn = "is_synced";
+const isSyncedColumn = "is_synced_with_cloud";
 
 const createUserTable = '''CREATE TABLE IF NOT EXISTS "user" (
         "id"	INTEGER NOT NULL,

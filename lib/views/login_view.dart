@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:notes_app/consts/routes.dart';
 import 'package:notes_app/services/auth/auth_service.dart';
 import '../services/auth/auth_exceptions.dart';
-import '../utils/show_error_dialog.dart';
-import 'dart:developer' as devtools show log;
+import 'package:notes_app/utils/dialog/error_dialog.dart';
 
 class LoginView extends StatefulWidget {
   const LoginView({Key? key}) : super(key: key);
@@ -81,7 +80,6 @@ class _LoginViewState extends State<LoginView> {
                   final user = await authService.logIn(
                       email: mail, password: pass
                   );
-                  devtools.log(user.toString());
                   if (user.isEmailVerified) {
                     Navigator.of(context).pushNamedAndRemoveUntil(
                         notesRoute,

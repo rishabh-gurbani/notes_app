@@ -3,6 +3,8 @@ import 'package:notes_app/consts/routes.dart';
 import 'package:notes_app/enums/menu_action.dart';
 import 'package:notes_app/services/auth/auth_service.dart';
 import 'package:notes_app/services/crud/notes_service.dart';
+import 'package:notes_app/utils/dialog/logout_dialog.dart';
+import 'notes_list_view.dart';
 
 class NotesView extends StatefulWidget {
   const NotesView({Key? key}) : super(key: key);
@@ -23,12 +25,6 @@ class _NotesViewState extends State<NotesView> {
   }
 
   @override
-  void dispose() {
-    _notesService.close();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -38,11 +34,11 @@ class _NotesViewState extends State<NotesView> {
               onPressed: () {
                 Navigator.of(context).pushNamed(newNoteRoute);
               },
-              icon: Icon(Icons.add)),
+              icon: const Icon(Icons.add)),
           PopupMenuButton<MenuAction>(onSelected: (value) async {
             switch (value) {
               case MenuAction.logout:
-                final shouldLogout = await showLogOutDialog(context);
+                final shouldLogout = await showLogoutDialog(context);
                 if (shouldLogout) {
                   await AuthService.firebase().signOut();
                   Navigator.of(context)
@@ -50,9 +46,9 @@ class _NotesViewState extends State<NotesView> {
                 }
             }
           }, itemBuilder: (context) {
-            return const [
-              PopupMenuItem<MenuAction>(
-                  value: MenuAction.logout, child: Text("Logout"))
+            return [
+              const PopupMenuItem<MenuAction>(
+                  value: MenuAction.logout, child: Text("Logout")),
             ];
           }),
         ],
@@ -68,40 +64,26 @@ class _NotesViewState extends State<NotesView> {
                     switch (snapshot.connectionState) {
                       case ConnectionState.waiting:
                       case ConnectionState.active:
-                        return Text("Waiting");
+                        if (snapshot.hasData) {
+                          final allNotes = snapshot.data as List<DatabaseNote>;
+                          return NotesListView(
+                            notes: allNotes,
+                            onDeleteNote: (note) async {
+                              await _notesService.deleteNote(id: note.id);
+                            },
+                          );
+                        } else {
+                          return const CircularProgressIndicator();
+                        }
                       default:
-                        return CircularProgressIndicator();
+                        return const CircularProgressIndicator();
                     }
                   },
                 );
               default:
-                return CircularProgressIndicator();
+                return const CircularProgressIndicator();
             }
           }),
     );
   }
-}
-
-Future<bool> showLogOutDialog(BuildContext context) {
-  return showDialog(
-    context: context,
-    builder: (context) {
-      return AlertDialog(
-        title: const Text("Sign Out"),
-        content: const Text("Are you sure you want to sign out?"),
-        actions: [
-          TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(false);
-              },
-              child: const Text("Cancel")),
-          TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(true);
-              },
-              child: const Text("Logout"))
-        ],
-      );
-    },
-  ).then((value) => value ?? false);
 }

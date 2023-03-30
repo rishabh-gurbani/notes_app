@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:notes_app/services/auth/auth_service.dart';
 import 'package:notes_app/services/crud/notes_service.dart';
@@ -17,7 +15,6 @@ class _NewNoteViewState extends State<NewNoteView> {
   late final TextEditingController _textController;
 
   Future<DatabaseNote> createNewNote() async {
-    log("called");
     final existingNote = _note;
     if (existingNote != null) {
       return existingNote;
@@ -27,7 +24,6 @@ class _NewNoteViewState extends State<NewNoteView> {
         .getCurrentUser!;
     final email = currentUser.email!;
     final owner = await _notesService.getUser(email: email);
-    log(owner.email);
     final note = await _notesService.createNote(owner: owner);
     return note;
   }
