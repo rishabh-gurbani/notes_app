@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:notes_app/services/auth/auth_service.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:notes_app/services/auth/bloc/auth_events.dart';
+import '../services/auth/bloc/auth_bloc.dart';
 
 class VerifyEmailView extends StatelessWidget {
   const VerifyEmailView({Key? key}) : super(key: key);
@@ -10,8 +12,8 @@ class VerifyEmailView extends StatelessWidget {
       appBar: AppBar(title: const Text("Verify Email"),),
       body: Column(
         children: [
-          TextButton(onPressed: () async {
-            await AuthService.firebase().sendVerificationMail();
+          TextButton(onPressed: () {
+            context.read<AuthBloc>().add(const AuthEventSendEmailVerification());
           },
               child: const Text("Verify Email ID"),
           )
