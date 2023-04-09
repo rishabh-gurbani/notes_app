@@ -1,15 +1,11 @@
 import 'dart:async';
-
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-
 import 'loading_screen_controller.dart';
 
 class LoadingScreen {
   // singleton class
   factory LoadingScreen() => _shared;
   static final LoadingScreen _shared = LoadingScreen._sharedInstance();
-
   LoadingScreen._sharedInstance();
 
   LoadingScreenController? controller;

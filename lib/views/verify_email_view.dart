@@ -9,16 +9,25 @@ class VerifyEmailView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Verify Email"),),
-      body: Column(
-        children: [
-          TextButton(onPressed: () {
-            context.read<AuthBloc>().add(const AuthEventSendEmailVerification());
-          },
+        appBar: AppBar(
+          title: const Text("Verify Email"),
+        ),
+        body: Center(
+          child: Column(children: [
+            TextButton(
+              onPressed: () {
+                context
+                    .read<AuthBloc>()
+                    .add(const AuthEventSendEmailVerification());
+              },
               child: const Text("Verify Email ID"),
-          )
-        ]
-      )
-    );
+            ),
+            TextButton(
+                onPressed: () {
+                  context.read<AuthBloc>().add(const AuthEventLogOut());
+                },
+                child: const Text("Restart")),
+          ]),
+        ));
   }
 }

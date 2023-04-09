@@ -6,16 +6,26 @@ import 'package:notes_app/services/auth/bloc/auth_state.dart';
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   AuthBloc(AuthProvider provider)
       : super(const AuthStateUninitialised(isLoading: true)) {
+
     on<AuthEventSendEmailVerification>((event, emit) async {
       await provider.sendVerificationMail();
       emit(state);
     });
 
+    // register screen
+    on<AuthEventShouldRegister>((event, emit) {
+      emit(const AuthStateRegistering(
+        exception: null,
+        isLoading: false,
+      ));
+    });
+
+    // register user action
     on<AuthEventRegister>((event, emit) async {
       final email = event.email;
       final password = event.password;
       try {
-        provider.register(email: email, password: password);
+        await provider.register(email: email, password: password);
         await provider.sendVerificationMail();
         emit(const AuthStateEmailNotVerified(isLoading: false));
       } on Exception catch (e) {
@@ -70,6 +80,42 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       } on Exception catch (e) {
         emit(AuthStateLoggedOut(exception: e, isLoading: false));
       }
+    });
+
+    on<AuthEventForgotPassword>((event, emit) async {
+      emit(const AuthStateForgotPassword(
+        exception: null,
+        hasSentEmail: false,
+        isLoading: false,
+      ));
+      final email = event.email;
+      if (email == null) {
+        return; // user just wants to go to forgot password screen
+      }
+
+      emit(const AuthStateForgotPassword(
+        exception: null,
+        hasSentEmail: false,
+        isLoading: true,
+      ));
+
+      bool didSendEmail;
+      Exception? exception;
+      try {
+        await provider.sendPasswordReset(toEmail:email);
+        didSendEmail = true;
+        exception = null;
+      } on Exception catch (e) {
+        didSendEmail = false;
+        exception = e;
+      }
+
+      emit(AuthStateForgotPassword(
+        exception: exception,
+        hasSentEmail: didSendEmail,
+        isLoading: false,
+      ));
+
     });
   }
 }
