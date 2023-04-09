@@ -12,10 +12,13 @@ import 'package:notes_app/views/notes/create_update_note_view.dart';
 import 'package:notes_app/views/notes/notes_view.dart';
 import 'package:notes_app/views/register_view.dart';
 import 'package:notes_app/views/verify_email_view.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   runApp(MaterialApp(
+    supportedLocales: AppLocalizations.supportedLocales,
+    localizationsDelegates: AppLocalizations.localizationsDelegates,
     title: 'Flutter Demo',
     debugShowCheckedModeBanner: false,
     theme: ThemeData(
@@ -33,7 +36,6 @@ void main() async {
 
 class HomePage extends StatelessWidget {
   const HomePage({Key? key}) : super(key: key);
-
 
   @override
   Widget build(BuildContext context) {
@@ -57,7 +59,7 @@ class HomePage extends StatelessWidget {
           return const LoginView();
         } else if (state is AuthStateRegistering) {
           return const RegisterView();
-        } else if (state is AuthStateForgotPassword){
+        } else if (state is AuthStateForgotPassword) {
           return const ForgotPasswordView();
         } else {
           return const Scaffold(
