@@ -38,6 +38,10 @@ class FirebaseCloudStorage {
         .then((docSnapshot) => CloudNote.fromDocumentSnapshot(docSnapshot));
   }
 
+
+  /// Returns Stream of all notes for given user.
+  /// Query itself makes sure that all notes retrieved belong to respective user.
+  /// Query is made on the Database.
   Stream<Iterable<CloudNote>> allNotes({required String ownerUserId}) {
     // two ways of doing same things
     // either get all docs and check the ones with userID
@@ -54,9 +58,9 @@ class FirebaseCloudStorage {
             querySnapshot.docs.map((doc) => CloudNote.fromQuerySnapshot(doc)));
   }
 
-  /// returns iterable of all notes for given user
-  /// query itself makes sure that all notes retrieved belong to respective user
-  /// query is made on the Database
+  /// Returns Iterable of all notes for given user.
+  /// Query itself makes sure that all notes retrieved belong to respective user.
+  /// query is made on the Database.
   Future<Iterable<CloudNote>> getNotes({required String ownerUserId}) async {
     try {
       return await notes
